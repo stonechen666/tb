@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明珠顺斌 · 利润报表 (退货率%输入)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 1500px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px 24px 30px;
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: #1f2f4d;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h1 span {
+            background: #e6f0ff;
+            color: #2c5e9c;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+        .subtitle {
+            color: #5a6a7f;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border-left: 4px solid #2c5e9c;
+            padding-left: 16px;
+            background: #f8faff;
+            line-height: 1.6;
+            border-radius: 0 8px 8px 0;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .download-btn {
+            background: #2c5e9c;
+            border: none;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #1e4a7a;
+        }
+        .download-btn:hover {
+            background: #1e4a7a;
+        }
+        .download-img-btn {
+            background: #5c6b7e;
+            border: none;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #4a5568;
+        }
+        .download-img-btn:hover {
+            background: #4a5568;
+        }
+        .reset-btn {
+            background: white;
+            border: 1px solid #d0d7e2;
+            color: #4a5a72;
+            padding: 7px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .reset-btn:hover {
+            background: #f5f7fc;
+            border-color: #9aaec9;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid #dfe6f0;
+            background: white;
+            margin: 16px 0 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,20,40,0.04);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+            font-size: 14px;
+            background: white;
+        }
+        th {
+            background: #f2f6fc;
+            color: #1f2f4d;
+            font-weight: 600;
+            padding: 12px 8px;
+            font-size: 13px;
+            text-align: center;
+            border-bottom: 1px solid #d7e0ea;
+            border-right: 1px solid #d7e0ea;
+            white-space: nowrap;
+        }
+        th:last-child {
+            border-right: none;
+        }
+        td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #e8edf5;
+            border-right: 1px solid #e8edf5;
+            background: white;
+            color: #1f2f4d;
+            font-weight: 400;
+        }
+        td:last-child {
+            border-right: none;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .shop-name {
+            font-weight: 500;
+            background-color: white;
+            color: #1f2f4d;
+        }
+        .profit-black {
+            color: #1f2f4d;
+            font-weight: 500;
+        }
+        .input-section {
+            background: #f9fcff;
+            border-radius: 8px;
+            border: 1px solid #e2eaf5;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .input-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px dashed #d0dbe9;
+        }
+        .input-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .input-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 140px;
+        }
+        .input-item label {
+            font-weight: 500;
+            font-size: 13px;
+            color: #4a5a72;
+        }
+        .input-item input {
+            background: white;
+            border: 1px solid #d0dbe9;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .input-item input:focus {
+            border-color: #2c5e9c;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(44,94,156,0.1);
+        }
+        .input-item .input-suffix {
+            position: relative;
+        }
+        .input-suffix input {
+            padding-right: 30px;
+        }
+        .input-suffix::after {
+            content: '%';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-weight: 500;
+        }
+        .badge {
+            background: #e6f0ff;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2c5e9c;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .date-indicator {
+            background: #f2f6fc;
+            padding: 6px 16px;
+            border-radius: 30px;
+            color: #2c5e9c;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .footnote {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #5a6a7f;
+            background: #f8faff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+        .total-pay-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #d0dbe9;
+        }
+        .total-pay-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2f4d;
+        }
+        .total-pay-value {
+            background: #e6f0ff;
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c5e9c;
+        }
+        .formula-hint {
+            font-size: 12px;
+            color: #8a9bb5;
+            margin-top: 4px;
+        }
+    </style>
+    <!-- 引入html2canvas用于截图 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="card">
+    <div class="flex-row">
+        <h1>
+            📋 明珠 · 顺斌 利润报表
+            <span>退货率%输入</span>
+        </h1>
+        <div class="badge">成本=发货×34 · 运费=发货×3</div>
+    </div>
+    
+    <div class="subtitle">
+        ⬇️ 退货率改为百分比输入（例如输入6.4代表6.4%），系统自动转换。表格中仍显示小数。
+    </div>
+
+    <!-- 当前日期显示 -->
+    <div class="date-indicator" id="todayDateDisplay"></div>
+
+    <!-- 输入区：明珠一行，顺斌一行 -->
+    <div class="input-section">
+        <!-- 第一行：明珠 -->
+        <div class="input-row">
+            <div class="input-item">
+                <label>明珠支付</label>
+                <input type="number" id="mzGrossPayInput" value="" step="0.01" placeholder="例如 1782">
+                <div class="formula-hint">支付 = 净支付/(1-退货率)</div>
+            </div>
+            <div class="input-item">
+                <label>明珠净支付</label>
+                <input type="number" id="mzNetPayInput" value="" step="0.01" placeholder="例如 1782">
+            </div>
+            <div class="input-item">
+                <label>明珠推广</label>
+                <input type="number" id="mzPromoInput" value="" step="0.01" placeholder="例如 470">
+            </div>
+            <div class="input-item">
+                <label>明珠付款单数</label>
+                <input type="number" id="mzPaidInput" value="" step="1" placeholder="例如 25">
+            </div>
+            <div class="input-item">
+                <label>明珠退货率 (%)</label>
+                <div class="input-suffix">
+                    <input type="number" id="mzRatePercentInput" value="" step="0.1" min="0" max="100" placeholder="例如 6.4">
+                </div>
+                <div class="formula-hint">输入百分比，如6.4代表6.4%</div>
+            </div>
+        </div>
+        
+        <!-- 第二行：顺斌 -->
+        <div class="input-row">
+            <div class="input-item">
+                <label>顺斌支付</label>
+                <input type="number" id="sbGrossPayInput" value="" step="0.01" placeholder="例如 1727">
+                <div class="formula-hint">支付 = 净支付/(1-退货率)</div>
+            </div>
+            <div class="input-item">
+                <label>顺斌净支付</label>
+                <input type="number" id="sbNetPayInput" value="" step="0.01" placeholder="例如 1727">
+            </div>
+            <div class="input-item">
+                <label>顺斌推广</label>
+                <input type="number" id="sbPromoInput" value="" step="0.01" placeholder="例如 476">
+            </div>
+            <div class="input-item">
+                <label>顺斌付款单数</label>
+                <input type="number" id="sbPaidInput" value="" step="1" placeholder="例如 31">
+            </div>
+            <div class="input-item">
+                <label>顺斌退货率 (%)</label>
+                <div class="input-suffix">
+                    <input type="number" id="sbRatePercentInput" value="" step="0.1" min="0" max="100" placeholder="例如 19.3">
+                </div>
+                <div class="formula-hint">输入百分比，如19.3代表19.3%</div>
+            </div>
+        </div>
+
+        <!-- 总支付金额显示 -->
+        <div class="total-pay-row">
+            <span class="total-pay-label">💰 总支付金额 (明珠+顺斌支付)</span>
+            <span class="total-pay-value" id="totalPayDisplay">0.00</span>
+        </div>
+        <div class="total-pay-row" style="margin-top:8px; border-top:none;">
+            <span class="total-pay-label">💰 总净支付金额 (明珠+顺斌净支付)</span>
+            <span class="total-pay-value" id="totalNetPayDisplay">0.00</span>
+        </div>
+    </div>
+
+    <!-- 工具条：下载Excel + 下载图片 + 清空 -->
+    <div class="toolbar">
+        <div class="btn-group">
+            <button class="download-btn" id="downloadExcelBtn">📥 下载 Excel 表格</button>
+            <button class="download-img-btn" id="downloadImageBtn">🖼️ 下载表格图片</button>
+        </div>
+        <button class="reset-btn" id="clearAllBtn">🗑️ 清空所有输入</button>
+    </div>
+
+    <!-- 数据表格：无支付列，退货率显示小数 -->
+    <div class="table-wrapper" id="tableContainer">
+        <table id="profitTable">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>店铺</th>
+                    <th>净支付</th>
+                    <th>推广</th>
+                    <th>产品成本</th>
+                    <th>实际礼金</th>
+                    <th>礼金</th>
+                    <th>运费</th>
+                    <th>发货单数</th>
+                    <th>付款单数</th>
+                    <th>退货率</th>
+                    <th>利润</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="mingzhu-row">
+                    <td id="mz_date"></td>
+                    <td class="shop-name">明珠</td>
+                    <td id="mz_netPay">—</td>
+                    <td id="mz_prom">—</td>
+                    <td id="mz_productCost">—</td>
+                    <td id="mz_actualGift">0.00</td>
+                    <td id="mz_gift">0.00</td>
+                    <td id="mz_shipping">—</td>
+                    <td id="mz_shipOrders">—</td>
+                    <td id="mz_paidOrders">—</td>
+                    <td id="mz_returnRate">—</td>
+                    <td id="mz_profit">—</td>
+                </tr>
+                <tr id="shunbin-row">
+                    <td id="sb_date"></td>
+                    <td class="shop-name">顺斌</td>
+                    <td id="sb_netPay">—</td>
+                    <td id="sb_prom">—</td>
+                    <td id="sb_productCost">—</td>
+                    <td id="sb_actualGift">0.00</td>
+                    <td id="sb_gift">0.00</td>
+                    <td id="sb_shipping">—</td>
+                    <td id="sb_shipOrders">—</td>
+                    <td id="sb_paidOrders">—</td>
+                    <td id="sb_returnRate">—</td>
+                    <td id="sb_profit">—</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footnote">
+        ⚙️ 退货率已改为百分比输入，表格中自动转换为小数显示（如6.4%显示为0.064）。利润黑色，无支付列。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 获取输入字段 ----------
+        // 明珠
+        const mzGrossPayInput = document.getElementById('mzGrossPayInput');
+        const mzNetPayInput = document.getElementById('mzNetPayInput');
+        const mzPromoInput = document.getElementById('mzPromoInput');
+        const mzPaidInput = document.getElementById('mzPaidInput');
+        const mzRatePercentInput = document.getElementById('mzRatePercentInput');
+
+        // 顺斌
+        const sbGrossPayInput = document.getElementById('sbGrossPayInput');
+        const sbNetPayInput = document.getElementById('sbNetPayInput');
+        const sbPromoInput = document.getElementById('sbPromoInput');
+        const sbPaidInput = document.getElementById('sbPaidInput');
+        const sbRatePercentInput = document.getElementById('sbRatePercentInput');
+
+        // 总支付显示元素
+        const totalPayDisplay = document.getElementById('totalPayDisplay');
+        const totalNetPayDisplay = document.getElementById('totalNetPayDisplay');
+
+        // 表格显示元素
+        const mz = {
+            date: document.getElementById('mz_date'),
+            netPay: document.getElementById('mz_netPay'),
+            prom: document.getElementById('mz_prom'),
+            productCost: document.getElementById('mz_productCost'),
+            actualGift: document.getElementById('mz_actualGift'),
+            gift: document.getElementById('mz_gift'),
+            shipping: document.getElementById('mz_shipping'),
+            shipOrders: document.getElementById('mz_shipOrders'),
+            paidOrders: document.getElementById('mz_paidOrders'),
+            returnRate: document.getElementById('mz_returnRate'),
+            profit: document.getElementById('mz_profit')
+        };
+        const sb = {
+            date: document.getElementById('sb_date'),
+            netPay: document.getElementById('sb_netPay'),
+            prom: document.getElementById('sb_prom'),
+            productCost: document.getElementById('sb_productCost'),
+            actualGift: document.getElementById('sb_actualGift'),
+            gift: document.getElementById('sb_gift'),
+            shipping: document.getElementById('sb_shipping'),
+            shipOrders: document.getElementById('sb_shipOrders'),
+            paidOrders: document.getElementById('sb_paidOrders'),
+            returnRate: document.getElementById('sb_returnRate'),
+            profit: document.getElementById('sb_profit')
+        };
+
+        const todayDisplay = document.getElementById('todayDateDisplay');
+
+        // 防循环标志
+        let isUpdating = false;
+
+        // 辅助函数：百分比转小数
+        function percentToDecimal(percent) {
+            if (percent === '' || isNaN(percent)) return NaN;
+            return parseFloat(percent) / 100;
+        }
+
+        // 小数转百分比（用于显示）
+        function decimalToPercent(decimal) {
+            if (decimal === '' || isNaN(decimal)) return '';
+            return (decimal * 100).toFixed(1);
+        }
+
+        // 格式化金额
+        function formatMoney(v, decimals = 2) { 
+            if (isNaN(v) || v === null || v === '') return '—';
+            return v.toFixed(decimals); 
+        }
+        
+        // 利润颜色固定为黑色
+        function updateProfitStyle() {
+            if (mz.profit.textContent !== '—') {
+                mz.profit.classList.add('profit-black');
+            }
+            if (sb.profit.textContent !== '—') {
+                sb.profit.classList.add('profit-black');
+            }
+        }
+
+        // 获取当天日期 YYYYMMDD
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}${month}${day}`;
+        }
+
+        // 计算总支付和总净支付并更新显示
+        function updateTotalPay() {
+            const mzGross = parseFloat(mzGrossPayInput.value) || 0;
+            const sbGross = parseFloat(sbGrossPayInput.value) || 0;
+            const mzNet = parseFloat(mzNetPayInput.value) || 0;
+            const sbNet = parseFloat(sbNetPayInput.value) || 0;
+            
+            totalPayDisplay.textContent = (mzGross + sbGross).toFixed(2);
+            totalNetPayDisplay.textContent = (mzNet + sbNet).toFixed(2);
+        }
+
+        // 获取明珠退货率小数
+        function getMzRateDecimal() {
+            return percentToDecimal(mzRatePercentInput.value);
+        }
+
+        // 获取顺斌退货率小数
+        function getSbRateDecimal() {
+            return percentToDecimal(sbRatePercentInput.value);
+        }
+
+        // 明珠联动计算
+        function syncMingzhuFromGross() {
+            if (isUpdating) return;
+            isUpdating = true;
+            
+            const gross = parseFloat(mzGrossPayInput.value);
+            if (isNaN(gross) || mzGrossPayInput.value === '') {
+                mzNetPayInput.value = '';
+            } else {
+                const rate = getMzRateDecimal();
+                if (isNaN(rate)) {
+                    mzNetPayInput.value = gross.toFixed(2);
+                } else if (rate >= 1) {
+                    mzNetPayInput.value = '0';
+                } else {
+                    const net = gross * (1 - rate);
+                    mzNetPayInput.value = net.toFixed(2);
+                }
+            }
+            
+            isUpdating = false;
+            updateTotalPay();
+        }
+
+        function syncMingzhuFromNet() {
+            if (isUpdating) return;
+            isUpdating = true;
+            
+            const net = parseFloat(mzNetPayInput.value);
+            if (isNaN(net) || mzNetPayInput.value === '') {
+                mzGrossPayInput.value = '';
+            } else {
+                const rate = getMzRateDecimal();
+                if (isNaN(rate)) {
+                    mzGrossPayInput.value = net.toFixed(2);
+                } else if (rate >= 1) {
+                    mzGrossPayInput.value = '0';
+                } else {
+                    const gross = net / (1 - rate);
+                    mzGrossPayInput.value = gross.toFixed(2);
+                }
+            }
+            
+            isUpdating = false;
+            updateTotalPay();
+        }
+
+        // 顺斌联动计算
+        function syncShunbinFromGross() {
+            if (isUpdating) return;
+            isUpdating = true;
+            
+            const gross = parseFloat(sbGrossPayInput.value);
+            if (isNaN(gross) || sbGrossPayInput.value === '') {
+                sbNetPayInput.value = '';
+            } else {
+                const rate = getSbRateDecimal();
+                if (isNaN(rate)) {
+                    sbNetPayInput.value = gross.toFixed(2);
+                } else if (rate >= 1) {
+                    sbNetPayInput.value = '0';
+                } else {
+                    const net = gross * (1 - rate);
+                    sbNetPayInput.value = net.toFixed(2);
+                }
+            }
+            
+            isUpdating = false;
+            updateTotalPay();
+        }
+
+        function syncShunbinFromNet() {
+            if (isUpdating) return;
+            isUpdating = true;
+            
+            const net = parseFloat(sbNetPayInput.value);
+            if (isNaN(net) || sbNetPayInput.value === '') {
+                sbGrossPayInput.value = '';
+            } else {
+                const rate = getSbRateDecimal();
+                if (isNaN(rate)) {
+                    sbGrossPayInput.value = net.toFixed(2);
+                } else if (rate >= 1) {
+                    sbGrossPayInput.value = '0';
+                } else {
+                    const gross = net / (1 - rate);
+                    sbGrossPayInput.value = gross.toFixed(2);
+                }
+            }
+            
+            isUpdating = false;
+            updateTotalPay();
+        }
+
+        // 更新表格显示
+        function updateTableDisplay() {
+            // 明珠
+            const mzNet = parseFloat(mzNetPayInput.value);
+            mz.netPay.textContent = !isNaN(mzNet) && mzNetPayInput.value !== '' ? mzNet.toFixed(2) : '—';
+            
+            const mzPromo = parseFloat(mzPromoInput.value);
+            mz.prom.textContent = !isNaN(mzPromo) && mzPromoInput.value !== '' ? mzPromo.toFixed(2) : '—';
+            
+            const mzPaid = parseFloat(mzPaidInput.value);
+            mz.paidOrders.textContent = !isNaN(mzPaid) && mzPaidInput.value !== '' ? mzPaid.toFixed(2) : '—';
+            
+            const mzRate = getMzRateDecimal();
+            mz.returnRate.textContent = !isNaN(mzRate) && mzRatePercentInput.value !== '' ? mzRate.toFixed(3) : '—';
+
+            // 顺斌
+            const sbNet = parseFloat(sbNetPayInput.value);
+            sb.netPay.textContent = !isNaN(sbNet) && sbNetPayInput.value !== '' ? sbNet.toFixed(2) : '—';
+            
+            const sbPromo = parseFloat(sbPromoInput.value);
+            sb.prom.textContent = !isNaN(sbPromo) && sbPromoInput.value !== '' ? sbPromo.toFixed(2) : '—';
+            
+            const sbPaid = parseFloat(sbPaidInput.value);
+            sb.paidOrders.textContent = !isNaN(sbPaid) && sbPaidInput.value !== '' ? sbPaid.toFixed(2) : '—';
+            
+            const sbRate = getSbRateDecimal();
+            sb.returnRate.textContent = !isNaN(sbRate) && sbRatePercentInput.value !== '' ? sbRate.toFixed(3) : '—';
+
+            // 计算产品成本、运费、利润（只有必要字段都有值时才计算）
+            if (!isNaN(mzNet) && !isNaN(mzPromo) && !isNaN(mzPaid) && !isNaN(mzRate) && 
+                mzNetPayInput.value !== '' && mzPromoInput.value !== '' && mzPaidInput.value !== '' && mzRatePercentInput.value !== '') {
+                const mzShipOrders = mzPaid * (1 - mzRate);
+                const mzProductCost = mzShipOrders * 34;
+                const mzShipping = mzShipOrders * 3;
+                const mzProfit = mzNet - mzPromo - mzProductCost - mzShipping;
+
+                mz.productCost.textContent = mzProductCost.toFixed(2);
+                mz.shipping.textContent = mzShipping.toFixed(2);
+                mz.shipOrders.textContent = mzShipOrders.toFixed(2);
+                mz.profit.textContent = mzProfit.toFixed(2);
+            } else {
+                mz.productCost.textContent = '—';
+                mz.shipping.textContent = '—';
+                mz.shipOrders.textContent = '—';
+                mz.profit.textContent = '—';
+            }
+
+            if (!isNaN(sbNet) && !isNaN(sbPromo) && !isNaN(sbPaid) && !isNaN(sbRate) && 
+                sbNetPayInput.value !== '' && sbPromoInput.value !== '' && sbPaidInput.value !== '' && sbRatePercentInput.value !== '') {
+                const sbShipOrders = sbPaid * (1 - sbRate);
+                const sbProductCost = sbShipOrders * 34;
+                const sbShipping = sbShipOrders * 3;
+                const sbProfit = sbNet - sbPromo - sbProductCost - sbShipping;
+
+                sb.productCost.textContent = sbProductCost.toFixed(2);
+                sb.shipping.textContent = sbShipping.toFixed(2);
+                sb.shipOrders.textContent = sbShipOrders.toFixed(2);
+                sb.profit.textContent = sbProfit.toFixed(2);
+            } else {
+                sb.productCost.textContent = '—';
+                sb.shipping.textContent = '—';
+                sb.shipOrders.textContent = '—';
+                sb.profit.textContent = '—';
+            }
+
+            updateProfitStyle();
+        }
+
+        // 清空所有输入
+        function clearAllInputs() {
+            mzGrossPayInput.value = '';
+            mzNetPayInput.value = '';
+            mzPromoInput.value = '';
+            mzPaidInput.value = '';
+            mzRatePercentInput.value = '';
+            
+            sbGrossPayInput.value = '';
+            sbNetPayInput.value = '';
+            sbPromoInput.value = '';
+            sbPaidInput.value = '';
+            sbRatePercentInput.value = '';
+            
+            updateTotalPay();
+            updateTableDisplay();
+        }
+
+        // 统一更新所有
+        function updateAll() {
+            updateTableDisplay();
+            updateTotalPay();
+            
+            const today = getTodayDate();
+            todayDisplay.textContent = `📅 当前日期：${today}`;
+            mz.date.textContent = today;
+            sb.date.textContent = '';
+        }
+
+        // 下载Excel
+        function downloadExcel() {
+            const today = getTodayDate();
+            
+            const headers = ['时间', '店铺', '净支付', '推广', '产品成本', '实际礼金', '礼金', '运费', '发货单数', '付款单数', '退货率', '利润'];
+            
+            const mzData = [
+                mz.date.textContent,
+                '明珠',
+                mz.netPay.textContent,
+                mz.prom.textContent,
+                mz.productCost.textContent,
+                mz.actualGift.textContent,
+                mz.gift.textContent,
+                mz.shipping.textContent,
+                mz.shipOrders.textContent,
+                mz.paidOrders.textContent,
+                mz.returnRate.textContent,
+                mz.profit.textContent
+            ];
+            
+            const sbData = [
+                sb.date.textContent,
+                '顺斌',
+                sb.netPay.textContent,
+                sb.prom.textContent,
+                sb.productCost.textContent,
+                sb.actualGift.textContent,
+                sb.gift.textContent,
+                sb.shipping.textContent,
+                sb.shipOrders.textContent,
+                sb.paidOrders.textContent,
+                sb.returnRate.textContent,
+                sb.profit.textContent
+            ];
+
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; border: 1px solid #d7e0ea; }
+        th { background: #f2f6fc; color: #1f2f4d; font-weight: 600; padding: 12px 8px; font-size: 13px; text-align: center; border: 1px solid #d7e0ea; }
+        td { padding: 10px 8px; text-align: center; border: 1px solid #e8edf5; color: #1f2f4d; font-size: 14px; }
+        .profit-black { color: #1f2f4d; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <table>
+        <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+        <tr>${mzData.map((d, i) => i === 11 ? `<td class="profit-black">${d}</td>` : `<td>${d}</td>`).join('')}</tr>
+        <tr>${sbData.map((d, i) => i === 11 ? `<td class="profit-black">${d}</td>` : `<td>${d}</td>`).join('')}</tr>
+    </table>
+    <p style="margin-top:20px;">总支付: ${totalPayDisplay.textContent} | 总净支付: ${totalNetPayDisplay.textContent}</p>
+</body>
+</html>`;
+
+            const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.setAttribute('download', `明珠顺斌_利润报表_${today}.xls`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // 下载图片
+        function downloadImage() {
+            const tableContainer = document.getElementById('tableContainer');
+            html2canvas(tableContainer, {
+                scale: 2,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: false,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `明珠顺斌_利润报表_${getTodayDate()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(error => {
+                console.error('截图失败:', error);
+                alert('截图生成失败，请重试。');
+            });
+        }
+
+        // 绑定事件
+        document.getElementById('downloadExcelBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadExcel();
+        });
+
+        document.getElementById('downloadImageBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            downloadImage();
+        });
+
+        document.getElementById('clearAllBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            clearAllInputs();
+        });
+
+        // 监听输入变化
+        // 明珠联动
+        mzGrossPayInput.addEventListener('input', () => {
+            syncMingzhuFromGross();
+            updateTableDisplay();
+        });
+        mzNetPayInput.addEventListener('input', () => {
+            syncMingzhuFromNet();
+            updateTableDisplay();
+        });
+        mzRatePercentInput.addEventListener('input', () => {
+            if (!isUpdating) {
+                isUpdating = true;
+                const net = parseFloat(mzNetPayInput.value);
+                if (!isNaN(net) && mzNetPayInput.value !== '') {
+                    const rate = getMzRateDecimal();
+                    if (!isNaN(rate)) {
+                        if (rate >= 1) {
+                            mzGrossPayInput.value = '0';
+                        } else {
+                            const gross = net / (1 - rate);
+                            mzGrossPayInput.value = gross.toFixed(2);
+                        }
+                    }
+                }
+                isUpdating = false;
+            }
+            updateTableDisplay();
+            updateTotalPay();
+        });
+
+        // 顺斌联动
+        sbGrossPayInput.addEventListener('input', () => {
+            syncShunbinFromGross();
+            updateTableDisplay();
+        });
+        sbNetPayInput.addEventListener('input', () => {
+            syncShunbinFromNet();
+            updateTableDisplay();
+        });
+        sbRatePercentInput.addEventListener('input', () => {
+            if (!isUpdating) {
+                isUpdating = true;
+                const net = parseFloat(sbNetPayInput.value);
+                if (!isNaN(net) && sbNetPayInput.value !== '') {
+                    const rate = getSbRateDecimal();
+                    if (!isNaN(rate)) {
+                        if (rate >= 1) {
+                            sbGrossPayInput.value = '0';
+                        } else {
+                            const gross = net / (1 - rate);
+                            sbGrossPayInput.value = gross.toFixed(2);
+                        }
+                    }
+                }
+                isUpdating = false;
+            }
+            updateTableDisplay();
+            updateTotalPay();
+        });
+
+        // 其他输入变化只更新表格
+        [mzPromoInput, mzPaidInput, sbPromoInput, sbPaidInput].forEach(inp => {
+            inp.addEventListener('input', updateTableDisplay);
+        });
+
+        // 页面加载
+        window.addEventListener('load', () => {
+            const today = getTodayDate();
+            todayDisplay.textContent = `📅 当前日期：${today}`;
+            mz.date.textContent = today;
+            sb.date.textContent = '';
+            clearAllInputs();
+        });
+    })();
+</script>
+</body>
+</html>
