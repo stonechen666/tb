@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>高清图片提取器 · 批量下载工具</title>
+    <!-- JSZip + FileSaver -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 24px 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* JSON 输入区 */
+        .json-input-section {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9eef3;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 20px;
+            background: #fefefe;
+            resize: vertical;
+            transition: 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #0f172a;
+            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+        }
+
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button.primary {
+            background: #0f172a;
+            border-color: #0f172a;
+            color: white;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        button.primary:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 28px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .info {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #eef2ff;
+            color: #1e40af;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-size: 1.7rem;
+            font-weight: 600;
+            margin: 0;
+            background: linear-gradient(135deg, #1e293b, #2d3a5e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 8px;
+        }
+
+        .image-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e9eef3;
+        }
+
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        .img-wrapper {
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            min-height: 240px;
+            cursor: pointer;
+        }
+
+        .img-wrapper img {
+            max-width: 100%;
+            max-height: 240px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .card-info {
+            padding: 14px 16px 16px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .card-title {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dimensions {
+            font-size: 0.7rem;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 30px;
+            font-family: monospace;
+        }
+
+        .download-btn {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 8px 0;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 10px;
+            transition: all 0.2s;
+            color: #0f172a;
+        }
+
+        .download-btn:hover {
+            background: #0f172a;
+            color: white;
+            border-color: #0f172a;
+        }
+
+        .status-bar {
+            background: #eef2ff;
+            border-radius: 60px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #1e40af;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 24px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+            background: white;
+            border-radius: 32px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+            .toolbar, .json-input-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- JSON 输入区域 -->
+    <div class="json-input-section">
+        <div class="section-title">
+            📋 粘贴豆包对话 JSON 数据 https://www.doubao.com/im/chain/single
+        </div>
+        <textarea id="jsonInput" rows="8" placeholder='请将 doubao.json 的完整内容粘贴至此，系统将自动提取所有 image_ori_raw 高清图片...'></textarea>
+        <div class="action-bar">
+            <button id="parseBtn" class="primary">🔍 解析并加载图片</button>
+            <button id="clearBtn">🗑️ 清空</button>
+        </div>
+    </div>
+
+    <!-- 主工具栏 -->
+    <div class="toolbar">
+        <div class="info">
+            <h1>📸 高清图像库</h1>
+            <div class="badge" id="imageCountBadge">等待解析</div>
+        </div>
+        <div class="btn-group">
+            <button id="batchDownloadBtn" class="primary" disabled>📦 批量下载全部 (ZIP)</button>
+        </div>
+    </div>
+
+    <div id="loadingStatus" class="status-bar" style="display: none;">⏳ 处理中...</div>
+    <div id="galleryContainer" class="gallery">
+        <div class="empty-state">✨ 请在上方粘贴 JSON 数据，点击“解析并加载图片”</div>
+    </div>
+    <div class="footer-note">
+        💡 支持多轮对话中的图片生成结果 | 自动提取所有 image_ori_raw 字段 | 单张下载 / 批量 ZIP 打包
+    </div>
+</div>
+
+<script>
+    // 全局图片列表
+    let currentImages = [];
+
+    // ---------- 核心提取函数（复用原逻辑）----------
+    function extractAllImagesFromData(dataObj) {
+        const images = [];
+        const messages = dataObj?.downlink_body?.pull_singe_chain_downlink_body?.messages || [];
+        for (const msg of messages) {
+            let contentBlocks = [];
+            if (msg.content_block && Array.isArray(msg.content_block)) {
+                contentBlocks = msg.content_block;
+            } else if (msg.content && typeof msg.content === 'string') {
+                try {
+                    contentBlocks = JSON.parse(msg.content);
+                } catch(e) { continue; }
+            } else {
+                continue;
+            }
+            for (const block of contentBlocks) {
+                if (block.block_type === 2074 && block.content?.creation_block?.creations?.length) {
+                    const creation = block.content.creation_block.creations[0];
+                    if (creation.type === 1 && creation.image?.image_ori_raw) {
+                        const raw = creation.image.image_ori_raw;
+                        if (raw.url) {
+                            images.push({
+                                url: raw.url,
+                                width: raw.width || 2048,
+                                height: raw.height || 2048,
+                                alt: `高清图_${images.length+1}`
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        // 基于 url 去重
+        const uniqueMap = new Map();
+        for (const img of images) {
+            if (!uniqueMap.has(img.url)) {
+                uniqueMap.set(img.url, img);
+            }
+        }
+        return Array.from(uniqueMap.values());
+    }
+
+    // 渲染图片网格
+    function renderGallery(images) {
+        const galleryContainer = document.getElementById('galleryContainer');
+        const countBadge = document.getElementById('imageCountBadge');
+        const batchBtn = document.getElementById('batchDownloadBtn');
+
+        if (!images.length) {
+            galleryContainer.innerHTML = `<div class="empty-state">⚠️ 未提取到任何图片，请检查 JSON 是否包含 image_ori_raw 字段</div>`;
+            countBadge.innerText = '0 张图片';
+            batchBtn.disabled = true;
+            return;
+        }
+
+        countBadge.innerText = `${images.length} 张高清图片`;
+        batchBtn.disabled = false;
+
+        let html = '';
+        images.forEach((img, idx) => {
+            const imgUrl = img.url;
+            const safeName = `highres_image_${idx+1}.jpg`;
+            // 获取文件扩展名（从url推测，但下载时仍用 .jpg 保证兼容）
+            html += `
+                <div class="image-card" data-url="${escapeHtml(imgUrl)}">
+                    <div class="img-wrapper">
+                        <img src="${imgUrl}" alt="高清图${idx+1}" loading="lazy" onerror="this.src='https://placehold.co/600x600?text=加载失败'">
+                    </div>
+                    <div class="card-info">
+                        <div class="card-title">
+                            <span>📷 图片 ${idx+1}</span>
+                            <span class="dimensions">${img.width}×${img.height}</span>
+                        </div>
+                        <button class="download-btn" data-url="${imgUrl}" data-name="${safeName}">⬇️ 单独下载</button>
+                    </div>
+                </div>
+            `;
+        });
+        galleryContainer.innerHTML = html;
+
+        // 绑定单独下载事件 (事件委托)
+        galleryContainer.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const url = btn.getAttribute('data-url');
+                const filename = btn.getAttribute('data-name');
+                await downloadSingleImage(url, filename);
+            });
+        });
+    }
+
+    // 下载单张图片
+    async function downloadSingleImage(url, filename) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`下载失败: ${response.status}`);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+            alert(`无法下载 ${filename}: ${err.message}`);
+        }
+    }
+
+    // 批量下载所有图片为ZIP
+    async function batchDownloadAll(images) {
+        if (!images.length) {
+            alert('没有图片可下载');
+            return;
+        }
+        const zip = new JSZip();
+        let completed = 0;
+        const total = images.length;
+        const statusDiv = document.getElementById('loadingStatus');
+        statusDiv.style.display = 'flex';
+        statusDiv.innerHTML = `📦 正在打包 ${total} 张图片，请稍后... (0/${total})`;
+
+        const promises = images.map(async (img, idx) => {
+            try {
+                const response = await fetch(img.url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const blob = await response.blob();
+                // 从 URL 中提取扩展名，如果没有则用 jpg
+                let ext = 'jpg';
+                const urlPath = img.url.split('?')[0];
+                const lastDot = urlPath.lastIndexOf('.');
+                if (lastDot !== -1) {
+                    ext = urlPath.substring(lastDot + 1);
+                }
+                const filename = `高清图片_${idx+1}.${ext === 'jpeg' ? 'jpg' : ext}`;
+                zip.file(filename, blob);
+                completed++;
+                statusDiv.innerHTML = `📦 正在打包 ${total} 张图片 ... (${completed}/${total})`;
+            } catch (err) {
+                console.warn(`图片 ${idx+1} 下载失败:`, err);
+                completed++;
+                statusDiv.innerHTML = `⚠️ 打包进度 (${completed}/${total})，部分失败，继续...`;
+            }
+        });
+
+        await Promise.all(promises);
+        statusDiv.innerHTML = `✨ 打包完成，正在生成 ZIP 文件...`;
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        saveAs(zipBlob, `高清图片合集_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.zip`);
+        statusDiv.innerHTML = `✅ 批量下载完成！共 ${total} 张图片已打包。`;
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+    }
+
+    // 辅助函数
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 主解析逻辑
+    function parseAndLoad() {
+        const rawJson = document.getElementById('jsonInput').value.trim();
+        if (!rawJson) {
+            alert('请在文本框中粘贴 JSON 数据');
+            return;
+        }
+
+        const statusDiv = document.getElementById('loadingStatus');
+        statusDiv.style.display = 'flex';
+        statusDiv.innerHTML = '⏳ 正在解析 JSON，请稍候...';
+
+        try {
+            const parsed = JSON.parse(rawJson);
+            const images = extractAllImagesFromData(parsed);
+            currentImages = images;
+            renderGallery(currentImages);
+            if (images.length === 0) {
+                statusDiv.innerHTML = '⚠️ 未找到任何 image_ori_raw 图片，请确认 JSON 结构';
+                setTimeout(() => { statusDiv.style.display = 'none'; }, 2500);
+            } else {
+                statusDiv.innerHTML = `✅ 成功提取 ${images.length} 张高清图片！`;
+                setTimeout(() => { statusDiv.style.display = 'none'; }, 2000);
+            }
+        } catch (err) {
+            console.error(err);
+            statusDiv.innerHTML = `❌ JSON 解析失败: ${err.message}`;
+            setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
+            // 清空画廊展示错误占位
+            document.getElementById('galleryContainer').innerHTML = `<div class="empty-state">❌ 无效的 JSON 格式，请检查输入</div>`;
+            document.getElementById('imageCountBadge').innerText = '解析失败';
+            document.getElementById('batchDownloadBtn').disabled = true;
+            currentImages = [];
+        }
+    }
+
+    // 清空输入框和画廊
+    function clearAll() {
+        document.getElementById('jsonInput').value = '';
+        currentImages = [];
+        renderGallery([]);
+        document.getElementById('imageCountBadge').innerText = '0 张图片';
+        document.getElementById('batchDownloadBtn').disabled = true;
+        const statusDiv = document.getElementById('loadingStatus');
+        statusDiv.style.display = 'none';
+    }
+
+    // 绑定事件
+    document.getElementById('parseBtn').addEventListener('click', parseAndLoad);
+    document.getElementById('clearBtn').addEventListener('click', clearAll);
+    document.getElementById('batchDownloadBtn').addEventListener('click', () => {
+        if (currentImages.length) {
+            batchDownloadAll(currentImages);
+        } else {
+            alert('没有可下载的图片，请先解析 JSON');
+        }
+    });
+
+    // 可选：为方便演示，提供一个示例填充（不自动填充，让用户自行粘贴）
+    // 但为了初次体验，可以将用户之前提供的示例 JSON 预置为 placeholder 提示？不需要，避免覆盖用户数据。
+    // 提供友好的占位说明
+    const textarea = document.getElementById('jsonInput');
+    textarea.placeholder = '示例：{\n  "downlink_body": {\n    "pull_singe_chain_downlink_body": {\n      "messages": [...]\n    }\n  }\n}\n\n请粘贴包含 image_ori_raw 的完整 JSON 响应。';
+</script>
+</body>
+</html>

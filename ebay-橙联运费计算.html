@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>国际物流计费工具 | 含产品成本/利润计算 | eBay售价参考</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+            padding: 2rem 1.5rem;
+            color: #1a2c3e;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1e4b6e, #2c7da0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            color: #4a627a;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .mode-switch {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .mode-btn {
+            background: #e9f0f5;
+            border: none;
+            padding: 0.6rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            color: #2c5f7a;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .mode-btn.active {
+            background: #2c7da0;
+            color: white;
+            box-shadow: 0 4px 10px rgba(44,125,160,0.3);
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            padding: 1.8rem 2rem;
+            margin-bottom: 2.5rem;
+            transition: all 0.2s;
+            border: 1px solid rgba(44, 125, 160, 0.15);
+        }
+
+        .calc-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #2c7da0;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group select, .input-group input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            font-size: 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 20px;
+            background: #fefefe;
+            transition: 0.2s;
+            outline: none;
+            font-weight: 500;
+            color: #0f2c3b;
+        }
+
+        .input-group select:focus, .input-group input:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
+        }
+
+        .search-group {
+            margin-bottom: 1.2rem;
+        }
+        .search-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 30px;
+            background: #fefefe;
+            outline: none;
+            transition: 0.2s;
+        }
+        .search-group input:focus {
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44,125,160,0.1);
+        }
+
+        .result-area {
+            background: #eef4fa;
+            border-radius: 24px;
+            padding: 1rem 1.8rem;
+            margin-top: 1.8rem;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .total-fee {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: #1e6f5c;
+        }
+
+        .total-fee span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c5f7a;
+        }
+
+        .fee-detail {
+            color: #2c3e50;
+            font-size: 0.9rem;
+            background: white;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+        }
+
+        .extra-fee-note {
+            font-size: 0.75rem;
+            color: #b4652a;
+            margin-top: 0.3rem;
+            text-align: right;
+        }
+
+        .price-row {
+            background: #f9f2e6;
+            border-radius: 20px;
+            padding: 0.8rem 1.5rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .selling-price {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #c25d2e;
+        }
+
+        .selling-price span {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .price-note {
+            font-size: 0.7rem;
+            color: #8b6946;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+            overflow-x: auto;
+            border: 1px solid #e9f0f5;
+        }
+
+        .rate-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            min-width: 720px;
+        }
+
+        .rate-table th {
+            background: #eef2f8;
+            padding: 1rem 0.8rem;
+            font-weight: 700;
+            color: #1e4b6e;
+            border-bottom: 1px solid #dce5ec;
+            text-align: center;
+        }
+
+        .rate-table td {
+            padding: 0.9rem 0.6rem;
+            text-align: center;
+            border-bottom: 1px solid #ecf3f8;
+            color: #2c3f55;
+            font-weight: 500;
+        }
+
+        .rate-table tr:hover {
+            background-color: #f8fbfe;
+        }
+
+        .country-name {
+            font-weight: 700;
+            color: #0f3b4f;
+            text-align: left;
+            padding-left: 1rem;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #1e6f5c;
+        }
+
+        .op-fee {
+            color: #b4652a;
+        }
+
+        .transit {
+            font-size: 0.75rem;
+            color: #6c86a3;
+            background: #f0f4f9;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+        }
+
+        .badge-note {
+            background: #fef4e6;
+            font-size: 0.7rem;
+            color: #b45f1b;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            white-space: nowrap;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6f8eaa;
+            border-top: 1px solid #dfe8ef;
+            padding-top: 1.5rem;
+        }
+
+        @media (max-width: 680px) {
+            body {
+                padding: 1rem;
+            }
+            .calculator-card {
+                padding: 1.5rem;
+            }
+            .total-fee {
+                font-size: 1.5rem;
+            }
+            .mode-btn {
+                padding: 0.4rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            .selling-price {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📦 跨境物流计费助手 · 标准/经济双模式</h1>
+        <p>中国大陆发件 · 重量单位【克(g)】| 含进口操作费 + 产品成本/利润 & eBay售价估算</p>
+    </div>
+
+    <div class="mode-switch">
+        <button class="mode-btn active" data-mode="standard">📘 标准模式</button>
+        <button class="mode-btn" data-mode="economic">⚡ 经济模式</button>
+    </div>
+
+    <div class="calculator-card">
+        <div class="search-group">
+            <input type="text" id="countrySearch" placeholder="🔍 搜索目的国家 (中文/英文)" autocomplete="off">
+        </div>
+        <div class="calc-grid">
+            <div class="input-group">
+                <label>🌍 目的国家</label>
+                <select id="countrySelect"></select>
+            </div>
+            <div class="input-group">
+                <label>⚖️ 包裹重量 (克 / g)</label>
+                <input type="number" id="weightGram" value="200" step="1" min="1" placeholder="例如 200">
+            </div>
+            <div class="input-group">
+                <label>📦 包裹数量 (件)</label>
+                <input type="number" id="packageQty" value="1" step="1" min="1" placeholder="件数">
+            </div>
+        </div>
+        <div class="calc-grid" style="margin-top: 1rem;">
+            <div class="input-group">
+                <label>💰 产品成本 (RMB/件)</label>
+                <input type="number" id="productCost" value="50.00" step="0.5" min="0" placeholder="例如 50">
+            </div>
+            <div class="input-group">
+                <label>📈 预期利润 (RMB/件)</label>
+                <input type="number" id="profit" value="30.00" step="0.5" min="0" placeholder="例如 30">
+            </div>
+            <div class="input-group" style="opacity:0.6; pointer-events: none;">
+                <label>📌 售价系数</label>
+                <input type="text" value="÷ 0.85" readonly style="background:#f4f4f4;">
+            </div>
+        </div>
+
+        <div class="result-area">
+            <div>
+                <div style="font-weight: 500; color:#2c7da0;">预估运输总费用 (RMB)</div>
+                <div class="total-fee" id="totalFeeDisplay">0.00 <span>¥</span></div>
+                <div class="extra-fee-note" id="extraFeeNote">含进口操作费 10.50元/票</div>
+            </div>
+            <div class="fee-detail" id="feeDetailText">
+                选择国家后自动计算
+            </div>
+        </div>
+
+        <div class="price-row">
+            <div>
+                <div style="font-weight: 500; color:#b45f1b;">🏷️ eBay建议售价 (RMB)</div>
+                <div class="selling-price" id="sellingPriceDisplay">0.00 <span>¥</span></div>
+                <div class="price-note">售价 = (成本 + 利润 + 运输费) ÷ 0.85 (含15%平台佣金后实收)</div>
+            </div>
+            <div class="fee-detail" id="priceDetailText">
+                输入成本/利润后自动计算
+            </div>
+        </div>
+
+        <div style="margin-top: 1rem; font-size: 0.7rem; color:#6f8eaa; background:#f8fafc; padding: 0.5rem 1rem; border-radius: 30px;">
+            💡 运输总费用 = 重量(kg) × 配送服务费 + 包裹操作费 × 包裹数量 + 进口操作费(10.5元/票)。<br>
+            📌 eBay售价公式 = (单品成本×数量 + 单品利润×数量 + 总运费) ÷ 0.85，确保扣除15%佣金后仍覆盖成本、利润和运费。
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="rate-table">
+            <thead>
+                <tr>
+                    <th>目的国家/地区</th>
+                    <th>配送服务费<br>(RMB/KG)</th>
+                    <th>包裹操作费<br>(RMB/包)</th>
+                    <th>参考时效</th>
+                    <th>备注</th>
+                </tr>
+                </thead>
+                <tbody id="rateTableBody"></tbody>
+        </table>
+    </div>
+    <footer>
+        🌏 数据基于最新物流价卡整理 | 重量单位“克(g)” | 售价计算公式已调整为除以0.85
+    </footer>
+</div>
+
+<script>
+    // ======================= 标准模式数据 =======================
+    const standardCountries = [
+        { nameCn: "美国", nameEn: "United States", unitPrice: 138.00, operationFee: 24.00, transit: "8-12个工作日", note: "0-100kg参考价" },
+        { nameCn: "英国", nameEn: "United Kingdom", unitPrice: 90.00, operationFee: 17.60, transit: "8-12个工作日", note: "标准费率" },
+        { nameCn: "德国", nameEn: "Germany", unitPrice: 112.20, operationFee: 18.10, transit: "8-13个工作日", note: "0-480kg区间" },
+        { nameCn: "澳大利亚", nameEn: "Australia", unitPrice: 88.70, operationFee: 38.50, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "加拿大", nameEn: "Canada", unitPrice: 133.00, operationFee: 26.20, transit: "8-12个工作日", note: "标准费率" },
+        { nameCn: "法国", nameEn: "France", unitPrice: 108.00, operationFee: 23.00, transit: "8-12个工作日", note: "首段0-500kg" },
+        { nameCn: "意大利", nameEn: "Italy", unitPrice: 108.10, operationFee: 26.80, transit: "8-12个工作日", note: "标准费率" },
+        { nameCn: "西班牙", nameEn: "Spain", unitPrice: 146.00, operationFee: 20.00, transit: "8-12个工作日", note: "标准费率" },
+        { nameCn: "奥地利", nameEn: "Austria", unitPrice: 135.70, operationFee: 28.60, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "比利时", nameEn: "Belgium", unitPrice: 163.80, operationFee: 21.70, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "捷克", nameEn: "Czech Republic", unitPrice: 155.70, operationFee: 25.70, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "丹麦", nameEn: "Denmark", unitPrice: 153.20, operationFee: 29.60, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "匈牙利", nameEn: "Hungary", unitPrice: 161.60, operationFee: 20.00, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "爱尔兰", nameEn: "Ireland", unitPrice: 161.70, operationFee: 33.50, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "荷兰", nameEn: "Netherlands", unitPrice: 162.80, operationFee: 22.20, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "波兰", nameEn: "Poland", unitPrice: 158.80, operationFee: 21.10, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "葡萄牙", nameEn: "Portugal", unitPrice: 176.90, operationFee: 21.90, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "瑞典", nameEn: "Sweden", unitPrice: 152.60, operationFee: 25.70, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "希腊", nameEn: "Greece", unitPrice: 172.80, operationFee: 20.90, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "克罗地亚", nameEn: "Croatia", unitPrice: 163.40, operationFee: 22.50, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "芬兰", nameEn: "Finland", unitPrice: 134.00, operationFee: 37.80, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "斯洛文尼亚", nameEn: "Slovenia", unitPrice: 143.00, operationFee: 27.90, transit: "8-12个工作日", note: "每1kg计量" },
+        { nameCn: "马耳他", nameEn: "Malta", unitPrice: 165.00, operationFee: 32.00, transit: "8-12个工作日", note: "原马其顿(马耳他)" },
+        { nameCn: "拉脱维亚", nameEn: "Latvia", unitPrice: 144.00, operationFee: 28.40, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "罗马尼亚", nameEn: "Romania", unitPrice: 141.00, operationFee: 25.50, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "斯洛伐克", nameEn: "Slovakia", unitPrice: 143.00, operationFee: 25.30, transit: "8-13个工作日", note: "含甲地" },
+        { nameCn: "爱沙尼亚", nameEn: "Estonia", unitPrice: 154.00, operationFee: 26.80, transit: "8-12个工作日", note: "含甲地" },
+        { nameCn: "斯洛文尼亚 (含带电)", nameEn: "Slovenia (Battery)", unitPrice: 143.00, operationFee: 27.90, transit: "8-13个工作日", note: "含带电 / 每1g计量" },
+        { nameCn: "马其顿 (含带电)", nameEn: "Malta (Battery)", unitPrice: 165.00, operationFee: 32.00, transit: "8-12个工作日", note: "含带电 / 马耳他地区" },
+        { nameCn: "拉脱维亚 (含带电)", nameEn: "Latvia (Battery)", unitPrice: 144.00, operationFee: 28.40, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "罗马尼亚 (含带电)", nameEn: "Romania (Battery)", unitPrice: 141.00, operationFee: 25.50, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "斯洛伐克 (含带电)", nameEn: "Slovakia (Battery)", unitPrice: 143.00, operationFee: 25.30, transit: "8-13个工作日", note: "含带电 / 8-13工作日" },
+        { nameCn: "爱沙尼亚 (含带电)", nameEn: "Estonia (Battery)", unitPrice: 154.00, operationFee: 26.80, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "保加利亚 (含带电)", nameEn: "Bulgaria (Battery)", unitPrice: 136.00, operationFee: 23.30, transit: "8-12个工作日", note: "含带电 / 0<x≤2000kg区间" },
+        { nameCn: "立陶宛 (含带电)", nameEn: "Lithuania (Battery)", unitPrice: 136.00, operationFee: 22.60, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "卢森堡 (含带电)", nameEn: "Luxembourg (Battery)", unitPrice: 119.00, operationFee: 27.00, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "塞浦路斯 (含带电)", nameEn: "Cyprus (Battery)", unitPrice: 151.00, operationFee: 26.70, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "瑞士 (含带电)", nameEn: "Switzerland (Battery)", unitPrice: 150.10, operationFee: 41.10, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "挪威 (含带电)", nameEn: "Norway (Battery)", unitPrice: 133.00, operationFee: 38.10, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "冰岛 (含带电)", nameEn: "Iceland (Battery)", unitPrice: 141.00, operationFee: 41.70, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "摩尔多瓦 (含带电)", nameEn: "Moldova (Battery)", unitPrice: 186.00, operationFee: 29.90, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "波黑 (含带电)", nameEn: "Bosnia and Herzegovina (Battery)", unitPrice: 211.00, operationFee: 29.90, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "塞尔维亚 (含带电)", nameEn: "Serbia (Battery)", unitPrice: 205.00, operationFee: 24.30, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "北马其顿 (含带电)", nameEn: "Macedonia (Battery)", unitPrice: 211.00, operationFee: 29.90, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "阿尔巴尼亚 (含带电)", nameEn: "Albania (Battery)", unitPrice: 211.00, operationFee: 29.90, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "黑山 (含带电)", nameEn: "Montenegro (Battery)", unitPrice: 210.00, operationFee: 29.90, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "白俄罗斯 (含带电)", nameEn: "Belarus (Battery)", unitPrice: 175.00, operationFee: 37.50, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "列支敦士登 (含带电)", nameEn: "Liechtenstein (Battery)", unitPrice: 146.00, operationFee: 39.20, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "圣马力诺 (含带电)", nameEn: "San Marino (Battery)", unitPrice: 141.00, operationFee: 34.20, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "安道尔 (含带电)", nameEn: "Andorra (Battery)", unitPrice: 146.00, operationFee: 28.10, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "土耳其 (含带电)", nameEn: "Turkey (Battery)", unitPrice: 146.00, operationFee: 32.80, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "摩纳哥 (含带电)", nameEn: "Monaco (Battery)", unitPrice: 141.00, operationFee: 27.10, transit: "8-12个工作日", note: "含带电" },
+        { nameCn: "法罗群岛 (含带电)", nameEn: "Faroe Islands (Battery)", unitPrice: 163.00, operationFee: 78.50, transit: "8-12个工作日", note: "含带电 / 高操作费" },
+        { nameCn: "新西兰 (含带电)", nameEn: "New Zealand (Battery)", unitPrice: 117.60, operationFee: 11.80, transit: "8-12个工作日", note: "含带电 / 0-30kg区间" }
+    ];
+
+    // ======================= 经济模式数据 =======================
+    const economicBaseCountries = [
+        { nameCn: "英国", nameEn: "United Kingdom", unitPrice: 101.00, operationFee: 15.00, transit: "8-12个工作日", note: "经济线 / 0-100g参考" },
+        { nameCn: "德国", nameEn: "Germany", unitPrice: 101.00, operationFee: 15.00, transit: "8-12个工作日", note: "经济线 / 31-100g" },
+        { nameCn: "澳大利亚", nameEn: "Australia", unitPrice: 149.00, operationFee: 7.70, transit: "10-15个工作日", note: "经济线 / 101-2000g" },
+        { nameCn: "加拿大 (含带电)", nameEn: "Canada (Battery)", unitPrice: 99.00, operationFee: 26.20, transit: "8-12个工作日", note: "经济线 / 0-300g" },
+        { nameCn: "法国 (含带电)", nameEn: "France (Battery)", unitPrice: 199.00, operationFee: 12.20, transit: "10-14个工作日", note: "经济线 / 101-2000g" },
+        { nameCn: "意大利 (含带电)", nameEn: "Italy (Battery)", unitPrice: 126.10, operationFee: 13.40, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "西班牙 (含带电)", nameEn: "Spain (Battery)", unitPrice: 163.50, operationFee: 13.40, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "奥地利 (含带电)", nameEn: "Austria (Battery)", unitPrice: 130.70, operationFee: 10.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "比利时 (含带电)", nameEn: "Belgium (Battery)", unitPrice: 167.90, operationFee: 13.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "克罗地亚 (含带电)", nameEn: "Croatia (Battery)", unitPrice: 145.30, operationFee: 10.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "捷克 (含带电)", nameEn: "Czech Republic (Battery)", unitPrice: 139.10, operationFee: 8.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "丹麦 (含带电)", nameEn: "Denmark (Battery)", unitPrice: 172.40, operationFee: 13.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "芬兰 (含带电)", nameEn: "Finland (Battery)", unitPrice: 171.50, operationFee: 9.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "希腊 (含带电)", nameEn: "Greece (Battery)", unitPrice: 142.20, operationFee: 9.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "匈牙利 (含带电)", nameEn: "Hungary (Battery)", unitPrice: 147.90, operationFee: 10.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "爱尔兰 (含带电)", nameEn: "Ireland (Battery)", unitPrice: 145.70, operationFee: 10.40, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "荷兰 (含带电)", nameEn: "Netherlands (Battery)", unitPrice: 142.80, operationFee: 9.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "波兰 (含带电)", nameEn: "Poland (Battery)", unitPrice: 146.40, operationFee: 10.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "葡萄牙 (含带电)", nameEn: "Portugal (Battery)", unitPrice: 141.30, operationFee: 8.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "斯洛伐克 (含带电)", nameEn: "Slovakia (Battery)", unitPrice: 133.70, operationFee: 14.70, transit: "8-12个工作日", note: "经济线 / 每1g计量" },
+        { nameCn: "斯洛文尼亚 (含带电)", nameEn: "Slovenia (Battery)", unitPrice: 168.40, operationFee: 12.70, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "瑞典 (含带电)", nameEn: "Sweden (Battery)", unitPrice: 191.50, operationFee: 1.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "保加利亚 (含带电)", nameEn: "Bulgaria (Battery)", unitPrice: 211.70, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "塞浦路斯 (含带电)", nameEn: "Cyprus (Battery)", unitPrice: 150.10, operationFee: 9.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "爱沙尼亚 (含带电)", nameEn: "Estonia (Battery)", unitPrice: 158.80, operationFee: 8.60, transit: "8-12个工作日", note: "经济线 / 0-2000g" },
+        { nameCn: "立陶宛 (含带电)", nameEn: "Lithuania (Battery)", unitPrice: 121.30, operationFee: 16.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "卢森堡 (含带电)", nameEn: "Luxembourg (Battery)", unitPrice: 151.60, operationFee: 9.90, transit: "8-12个工作日", note: "经济线" }
+    ];
+
+    const newEconomicCountries = [
+        { nameCn: "斯洛伐克 (含中甸)", nameEn: "Slovakia (Battery)", unitPrice: 141.30, operationFee: 8.60, transit: "8-12个工作日", note: "经济线 / 每1份计量" },
+        { nameCn: "斯洛文尼亚 (含中甸)", nameEn: "Slovenia (Battery)", unitPrice: 133.70, operationFee: 14.70, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "瑞典 (含中甸)", nameEn: "Sweden (Battery)", unitPrice: 168.40, operationFee: 12.70, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "保加利亚 (含中甸)", nameEn: "Bulgaria (Battery)", unitPrice: 191.50, operationFee: 1.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "塞浦路斯 (含中甸)", nameEn: "Cyprus (Battery)", unitPrice: 211.70, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "爱沙尼亚 (含中甸)", nameEn: "Estonia (Battery)", unitPrice: 150.10, operationFee: 9.50, transit: "8-12个工作日", note: "经济线 / 0<x≤2000" },
+        { nameCn: "立陶宛 (含中甸)", nameEn: "Lithuania (Battery)", unitPrice: 158.80, operationFee: 8.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "卢森堡 (含中甸)", nameEn: "Luxembourg (Battery)", unitPrice: 121.30, operationFee: 16.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "拉脱维亚 (含中甸)", nameEn: "Latvia (Battery)", unitPrice: 151.60, operationFee: 9.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "罗马尼亚 (含中甸)", nameEn: "Romania (Battery)", unitPrice: 150.20, operationFee: 7.90, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "马耳他 (含中甸)", nameEn: "Malta (Battery)", unitPrice: 218.90, operationFee: 1.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "挪威", nameEn: "Norway", unitPrice: 171.00, operationFee: 23.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "瑞士", nameEn: "Switzerland", unitPrice: 167.90, operationFee: 10.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "土耳其", nameEn: "Turkey", unitPrice: 188.30, operationFee: 10.00, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "安道尔", nameEn: "Andorra", unitPrice: 265.80, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "阿尔巴尼亚", nameEn: "Albania", unitPrice: 240.40, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "波黑", nameEn: "Bosnia and Herzegovina", unitPrice: 239.90, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "法罗群岛", nameEn: "Faroe Islands", unitPrice: 326.10, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "冰岛", nameEn: "Iceland", unitPrice: 178.10, operationFee: 25.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "列支敦士登", nameEn: "Liechtenstein", unitPrice: 212.90, operationFee: 1.60, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "摩纳哥", nameEn: "Monaco", unitPrice: 265.80, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "塞尔维亚", nameEn: "Serbia", unitPrice: 219.20, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "圣马力诺", nameEn: "San Marino", unitPrice: 260.30, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "摩尔多瓦", nameEn: "Republic of Moldova", unitPrice: 227.50, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "黑山", nameEn: "Montenegro", unitPrice: 217.90, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" },
+        { nameCn: "北马其顿", nameEn: "North Macedonia", unitPrice: 223.90, operationFee: 1.50, transit: "8-12个工作日", note: "经济线" }
+    ];
+
+    function mergeEconomicData(base, newData) {
+        const map = new Map();
+        base.forEach(item => {
+            const key = item.nameCn.replace(/[（(].*?[）)]/g, '').trim();
+            map.set(key, item);
+        });
+        newData.forEach(item => {
+            const key = item.nameCn.replace(/[（(].*?[）)]/g, '').trim();
+            if (map.has(key)) {
+                const existing = map.get(key);
+                existing.unitPrice = item.unitPrice;
+                existing.operationFee = item.operationFee;
+                existing.note = item.note + " (更新)";
+                if (item.transit) existing.transit = item.transit;
+            } else {
+                map.set(key, item);
+            }
+        });
+        return Array.from(map.values());
+    }
+    const economicCountries = mergeEconomicData(economicBaseCountries, newEconomicCountries);
+
+    let currentMode = 'standard';
+    let currentData = standardCountries;
+    let filteredData = [...currentData];
+
+    const countrySelect = document.getElementById('countrySelect');
+    const rateTableBody = document.getElementById('rateTableBody');
+    const weightInput = document.getElementById('weightGram');
+    const qtyInput = document.getElementById('packageQty');
+    const totalFeeSpan = document.getElementById('totalFeeDisplay');
+    const feeDetailSpan = document.getElementById('feeDetailText');
+    const searchInput = document.getElementById('countrySearch');
+    const productCostInput = document.getElementById('productCost');
+    const profitInput = document.getElementById('profit');
+    const sellingPriceSpan = document.getElementById('sellingPriceDisplay');
+    const priceDetailSpan = document.getElementById('priceDetailText');
+
+    const IMPORT_FEE = 10.5;
+    const COMMISSION_FACTOR = 0.85;  // 平台佣金率15%，即实际到手为售价的85%
+    // 售价 = (成本+利润+运费) / 0.85
+
+    function getTotalShippingFee() {
+        if (filteredData.length === 0) return 0;
+        const idx = parseInt(countrySelect.value, 10);
+        if (isNaN(idx) || idx < 0 || idx >= filteredData.length) return 0;
+        const country = filteredData[idx];
+        let weightGram = parseFloat(weightInput.value);
+        let qty = parseInt(qtyInput.value, 10);
+        if (isNaN(weightGram) || weightGram <= 0) return 0;
+        if (isNaN(qty) || qty < 1) qty = 1;
+        const weightKg = weightGram / 1000;
+        const shippingCost = weightKg * country.unitPrice;
+        const totalOperation = qty * country.operationFee;
+        return shippingCost + totalOperation + IMPORT_FEE;
+    }
+
+    function updateAll() {
+        if (filteredData.length === 0) {
+            totalFeeSpan.innerHTML = '0.00 <span>¥</span>';
+            feeDetailSpan.innerHTML = '⚠️ 未找到匹配的国家';
+            sellingPriceSpan.innerHTML = '0.00 <span>¥</span>';
+            priceDetailSpan.innerHTML = '请选择有效国家';
+            return;
+        }
+        const idx = parseInt(countrySelect.value, 10);
+        if (isNaN(idx) || idx < 0 || idx >= filteredData.length) return;
+        const country = filteredData[idx];
+        let weightGram = parseFloat(weightInput.value);
+        let qty = parseInt(qtyInput.value, 10);
+        if (isNaN(weightGram) || weightGram <= 0) {
+            totalFeeSpan.innerHTML = '0.00 <span>¥</span>';
+            feeDetailSpan.innerHTML = '⚠️ 请输入有效重量 (>0 克)';
+            sellingPriceSpan.innerHTML = '0.00 <span>¥</span>';
+            priceDetailSpan.innerHTML = '重量无效';
+            return;
+        }
+        if (isNaN(qty) || qty < 1) {
+            qty = 1;
+            qtyInput.value = 1;
+        }
+        const weightKg = weightGram / 1000;
+        const shippingCost = weightKg * country.unitPrice;
+        const totalOperation = qty * country.operationFee;
+        const totalShipping = shippingCost + totalOperation + IMPORT_FEE;
+
+        totalFeeSpan.innerHTML = `${totalShipping.toFixed(2)} <span>¥</span>`;
+        feeDetailSpan.innerHTML = `📦 ${country.nameCn} · ${weightGram} g = ${weightKg.toFixed(3)} kg × ${country.unitPrice.toFixed(2)} ¥/kg = ${shippingCost.toFixed(2)} ¥ &nbsp;|&nbsp; 操作费 ${country.operationFee.toFixed(2)} ¥/包 × ${qty} 件 = ${totalOperation.toFixed(2)} ¥ &nbsp;|&nbsp; 进口操作费 ${IMPORT_FEE.toFixed(2)} ¥/票`;
+
+        let costPerItem = parseFloat(productCostInput.value);
+        let profitPerItem = parseFloat(profitInput.value);
+        if (isNaN(costPerItem) || costPerItem < 0) costPerItem = 0;
+        if (isNaN(profitPerItem) || profitPerItem < 0) profitPerItem = 0;
+        const totalGoodsCost = (costPerItem + profitPerItem) * qty;
+        const totalBase = totalGoodsCost + totalShipping;
+        // 售价 = 总成本 / 0.85
+        const sellingPrice = totalBase / COMMISSION_FACTOR;
+        sellingPriceSpan.innerHTML = `${sellingPrice.toFixed(2)} <span>¥</span>`;
+        priceDetailSpan.innerHTML = `(成本${costPerItem.toFixed(2)}元 + 利润${profitPerItem.toFixed(2)}元) × ${qty}件 = ${totalGoodsCost.toFixed(2)}元，+运费${totalShipping.toFixed(2)}元 = ${totalBase.toFixed(2)}元，÷ ${COMMISSION_FACTOR} (建议售价)`;
+    }
+
+    function filterCountries(searchText) {
+        if (!searchText.trim()) {
+            filteredData = [...currentData];
+        } else {
+            const lower = searchText.toLowerCase();
+            filteredData = currentData.filter(c => c.nameCn.toLowerCase().includes(lower) || c.nameEn.toLowerCase().includes(lower));
+        }
+        renderSelectAndTable();
+        if (filteredData.length === 0) {
+            totalFeeSpan.innerHTML = '0.00 <span>¥</span>';
+            feeDetailSpan.innerHTML = '⚠️ 未找到匹配的国家';
+            sellingPriceSpan.innerHTML = '0.00 <span>¥</span>';
+            priceDetailSpan.innerHTML = '请尝试其他关键词';
+        } else {
+            countrySelect.selectedIndex = 0;
+            updateAll();
+        }
+    }
+
+    function renderSelectAndTable() {
+        countrySelect.innerHTML = '';
+        filteredData.forEach((c, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `${c.nameCn} (${c.nameEn})`;
+            countrySelect.appendChild(opt);
+        });
+        rateTableBody.innerHTML = '';
+        filteredData.forEach(c => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="country-name">${c.nameCn}<br><span style="font-size:0.7rem;">${c.nameEn}</span></td>
+                <td class="price">${c.unitPrice.toFixed(2)} ¥/kg</td>
+                <td class="op-fee">${c.operationFee.toFixed(2)} ¥/包</td>
+                <td><span class="transit">${c.transit || "8-12个工作日"}</span></td>
+                <td><span class="badge-note">${c.note || "标准费率"}</span></td>
+            `;
+            rateTableBody.appendChild(row);
+        });
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        currentData = mode === 'standard' ? standardCountries : economicCountries;
+        searchInput.value = '';
+        filterCountries('');
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            if (btn.getAttribute('data-mode') === mode) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+    }
+
+    function bindEvents() {
+        countrySelect.addEventListener('change', updateAll);
+        weightInput.addEventListener('input', updateAll);
+        qtyInput.addEventListener('input', updateAll);
+        productCostInput.addEventListener('input', updateAll);
+        profitInput.addEventListener('input', updateAll);
+        weightInput.addEventListener('blur', () => { if (isNaN(parseFloat(weightInput.value)) || parseFloat(weightInput.value) <= 0) weightInput.value = ''; updateAll(); });
+        qtyInput.addEventListener('blur', () => { let v = parseInt(qtyInput.value,10); if (isNaN(v) || v<1) qtyInput.value=1; updateAll(); });
+        searchInput.addEventListener('input', e => filterCountries(e.target.value));
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', e => setMode(e.currentTarget.getAttribute('data-mode'))));
+    }
+
+    function init() {
+        setMode('standard');
+        bindEvents();
+        updateAll();
+    }
+    init();
+</script>
+</body>
+</html>
