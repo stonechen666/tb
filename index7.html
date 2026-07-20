@@ -281,14 +281,14 @@
 <div class="card">
     <div class="flex-row">
         <h1>
-            ?? 明珠 · 顺斌
-            <span>成本42元/件 · 运费5元/件</span>
+            📋 明珠 · 顺斌
+            <span></span>
         </h1>
         <div class="badge">成本=发货×42, 运费=发货×5</div>
     </div>
     
     <div class="subtitle">
-        ? 双店平行输入 | 合并支付/净支付（点击按钮切换模式）
+        ✅ 双店平行输入 | 合并支付/净支付（点击按钮切换模式）
     </div>
 
     <div class="date-indicator" id="todayDateDisplay"></div>
@@ -297,7 +297,7 @@
         <div class="double-shop">
             <!-- 明珠 -->
             <div class="shop-col">
-                <div class="shop-title">?? 明珠</div>
+                <div class="shop-title">🌟 明珠</div>
                 <div class="input-grid">
                     <div class="input-item">
                         <label id="mzPayLabel">支付 (总额)</label>
@@ -322,7 +322,7 @@
             </div>
             <!-- 顺斌 -->
             <div class="shop-col">
-                <div class="shop-title">? 顺斌</div>
+                <div class="shop-title">⚡ 顺斌</div>
                 <div class="input-grid">
                     <div class="input-item">
                         <label id="sbPayLabel">支付 (总额)</label>
@@ -350,9 +350,9 @@
 
     <div class="toolbar">
         <div class="btn-group">
-            <button class="download-btn" id="downloadExcelBtn">?? 下载Excel</button>
-            <button class="download-img-btn" id="downloadImageBtn">??? 截图</button>
-            <button class="reset-btn" id="clearAllBtn">??? 清空</button>
+            <button class="download-btn" id="downloadExcelBtn">📥 下载Excel</button>
+            <button class="download-img-btn" id="downloadImageBtn">🖼️ 截图</button>
+            <button class="reset-btn" id="clearAllBtn">🗑️ 清空</button>
         </div>
     </div>
 
@@ -370,7 +370,7 @@
 
     <!-- 截图容器（同步成本42 运费5） -->
     <div id="screenshotContainer">
-        <div style="font-size:18px; font-weight:600; margin-bottom:15px;">明珠顺斌利润报表 (成本42元/件, 运费5元/件)</div>
+        <div style="font-size:18px; font-weight:600; margin-bottom:15px;">明珠顺斌利润报表 </div>
         <table style="width:100%; border-collapse:collapse; border:1px solid #d7e0ea;">
             <thead>
                 <tr style="background:#f2f6fc;">
@@ -497,7 +497,7 @@
 
     function updateAll() {
         const today = getToday();
-        todayDisplay.textContent = '?? 当前日期：' + today;
+        todayDisplay.textContent = '📅 当前日期：' + today;
         mzDate.textContent = today;
         sbDate.textContent = '';
         mzDateHidden.textContent = today;
